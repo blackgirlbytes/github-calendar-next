@@ -213,15 +213,22 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
   };
 
   const handleModalSave = async (eventData: Partial<CalendarEvent>) => {
+    console.log('💾 handleModalSave called with:', { mode: modalState.mode, eventData });
+    
     try {
       if (modalState.mode === 'create' && onEventCreate) {
+        console.log('🆕 Creating new event');
         await onEventCreate(eventData);
-      } else if (modalState.mode === 'edit' && modalState.event && onEventUpdate) {
+      } else if ((modalState.mode === 'edit' || modalState.mode === 'view') && modalState.event && onEventUpdate) {
+        console.log('✏️ Editing existing event');
         await onEventUpdate({ ...eventData, id: modalState.event.id });
+      } else {
+        console.log('⚠️ No action taken - mode:', modalState.mode, 'event:', !!modalState.event, 'onEventUpdate:', !!onEventUpdate);
       }
+      console.log('✅ Modal save completed, closing modal');
       handleModalClose();
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error('❌ Error saving event:', error);
       throw error; // Re-throw to let the modal handle the error
     }
   };

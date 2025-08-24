@@ -65,7 +65,10 @@ export default function Home() {
   };
 
   const handleEventUpdate = async (eventData: Partial<CalendarEvent>) => {
+    console.log('🔄 handleEventUpdate called with:', eventData);
+    
     try {
+      console.log('📡 Making PATCH request to /api/issues');
       const response = await fetch('/api/issues', {
         method: 'PATCH',
         headers: {
@@ -74,19 +77,24 @@ export default function Home() {
         body: JSON.stringify(eventData),
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ API error response:', errorData);
         throw new Error(errorData.error || 'Failed to update issue');
       }
 
       const result = await response.json();
-      console.log('Issue updated successfully:', result);
+      console.log('✅ Issue updated successfully:', result);
       
       // Refresh events from GitHub to ensure consistency
+      console.log('🔄 Refreshing events...');
       await refreshEvents();
+      console.log('✅ Events refreshed');
       
     } catch (error) {
-      console.error('Error updating issue:', error);
+      console.error('❌ Error updating issue:', error);
       throw error; // Re-throw to let the modal handle the error
     }
   };

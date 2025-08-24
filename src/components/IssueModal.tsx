@@ -69,6 +69,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
   }, [mode]);
 
   const handleSave = async () => {
+    console.log('🔥 handleSave called!', { mode, event, formData, isEditing });
+    
     if (!formData.title.trim()) {
       alert('Title is required');
       return;
@@ -77,8 +79,12 @@ const IssueModal: React.FC<IssueModalProps> = ({
     setIsSaving(true);
     try {
       // Include the event ID when editing an existing issue
-      const saveData = mode === 'edit' && event ? { ...formData, id: event.id } : formData;
+      const saveData = (mode === 'edit' || isEditing) && event ? { ...formData, id: event.id } : formData;
+      console.log('🚀 About to call onSave with:', saveData);
+      
       await onSave(saveData);
+      
+      console.log('✅ onSave completed successfully');
       
       // Only close modal after successful save
       if (mode === 'create') {
@@ -87,7 +93,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
         setIsEditing(false);
       }
     } catch (error) {
-      console.error('Error saving issue:', error);
+      console.error('❌ Error saving issue:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to save issue. Please try again.';
       alert(errorMessage);
     } finally {
