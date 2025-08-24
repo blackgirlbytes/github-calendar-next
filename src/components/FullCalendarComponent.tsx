@@ -113,7 +113,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
       } : colors;
       
       return {
-        id: event.id,
+        id: `${event.id}-${event.startDate?.toISOString().split('T')[0] || 'no-date'}`, // Unique ID to prevent hover conflicts
         title: event.title,
         start: event.startDate,
         end: eventEnd,
@@ -128,7 +128,8 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
           status: event.status,
           repository: event.url?.split('/').slice(3, 5).join('/'),
           primaryAssignee: primaryAssignee,
-          isCompleted: isCompleted
+          isCompleted: isCompleted,
+          originalId: event.id // Keep original ID for reference
         }
       };
     });
