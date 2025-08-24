@@ -113,7 +113,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
       } : colors;
       
       return {
-        id: `${event.id}-${event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : 'no-date'}`, // Unique ID to prevent hover conflicts
+        id: eventEnd ? event.id : `${event.id}-single`, // Use original ID for spanned events, unique ID for single events
         title: event.title,
         start: event.startDate,
         end: eventEnd,
