@@ -82,19 +82,12 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Extract issue number from ID - handle both numeric IDs and GitHub issue numbers
-    let issueNumber: number;
-    if (typeof id === 'string' && id.includes('#')) {
-      // If ID contains '#', extract the number after it
-      issueNumber = parseInt(id.split('#')[1]);
-    } else {
-      // Otherwise, extract all digits from the ID
-      issueNumber = parseInt(id.toString().replace(/\D/g, ''));
-    }
+    // The ID should be the issue number directly (as stored in our calendar events)
+    const issueNumber = parseInt(id.toString());
 
     if (!issueNumber || isNaN(issueNumber)) {
       return NextResponse.json(
-        { error: 'Invalid issue ID format' },
+        { error: 'Invalid issue number format' },
         { status: 400 }
       );
     }

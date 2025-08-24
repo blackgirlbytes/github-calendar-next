@@ -14,31 +14,35 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch events from August 2025 onwards
-        const since = new Date('2025-08-01').toISOString();
-        const response = await fetch(`/api/events?since=${since}`);
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch events');
-        }
-        
-        const data = await response.json();
-        setEvents(data.events);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      } finally {
-        setLoading(false);
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch events from August 2025 onwards
+      const since = new Date('2025-08-01').toISOString();
+      const response = await fetch(`/api/events?since=${since}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch events');
       }
-    };
+      
+      const data = await response.json();
+      setEvents(data.events);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const refreshEvents = async () => {
+    await fetchEvents();
+  };
+
+  useEffect(() => {
     fetchEvents();
   }, []);
 
@@ -76,13 +80,11 @@ export default function Home() {
       }
 
       const result = await response.json();
-      
-      // Update local state with the updated event
-      setEvents(prev => prev.map(event => 
-        event.id === eventData.id ? { ...event, ...eventData } : event
-      ));
-
       console.log('Issue updated successfully:', result);
+      
+      // Refresh events from GitHub to ensure consistency
+      await refreshEvents();
+      
     } catch (error) {
       console.error('Error updating issue:', error);
       throw error; // Re-throw to let the modal handle the error
@@ -105,22 +107,11 @@ export default function Home() {
       }
 
       const result = await response.json();
-      
-      // Create new event with the actual GitHub issue data
-      const newEvent: CalendarEvent = {
-        id: result.issue.id,
-        title: result.issue.title,
-        startDate: eventData.startDate || new Date(),
-        endDate: eventData.endDate || null,
-        url: result.issue.url,
-        labels: eventData.labels || [],
-        assignees: eventData.assignees || [],
-        status: result.issue.status,
-        type: 'issue'
-      };
-      
-      setEvents(prev => [...prev, newEvent]);
       console.log('Issue created successfully:', result);
+      
+      // Refresh events from GitHub to ensure consistency
+      await refreshEvents();
+      
     } catch (error) {
       console.error('Error creating issue:', error);
       throw error; // Re-throw to let the modal handle the error

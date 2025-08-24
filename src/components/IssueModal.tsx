@@ -79,13 +79,17 @@ const IssueModal: React.FC<IssueModalProps> = ({
       // Include the event ID when editing an existing issue
       const saveData = mode === 'edit' && event ? { ...formData, id: event.id } : formData;
       await onSave(saveData);
-      setIsEditing(false);
+      
+      // Only close modal after successful save
       if (mode === 'create') {
         onClose();
+      } else {
+        setIsEditing(false);
       }
     } catch (error) {
       console.error('Error saving issue:', error);
-      alert('Failed to save issue. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save issue. Please try again.';
+      alert(errorMessage);
     } finally {
       setIsSaving(false);
     }
