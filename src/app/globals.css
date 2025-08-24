@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* FullCalendar custom styling */
+.fc {
+  font-family: inherit;
+  background: transparent;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: none;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+  border-color: rgba(203, 213, 225, 0.3);
+}
+
+.fc-col-header-cell {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border: none;
+  padding: 12px 8px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.fc-daygrid-day {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(203, 213, 225, 0.2);
+  transition: all 0.2s ease;
+}
+
+.fc-daygrid-day:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fc-daygrid-day-number {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 8px;
+}
+
+.fc-event {
+  border-radius: 8px;
+  border: none !important;
+  font-size: 11px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.fc-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+}
+
+.fc-daygrid-event {
+  margin: 2px 3px;
+  padding: 2px 6px;
+}
+
+.fc-toolbar {
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.fc-toolbar-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fc-button-group {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.fc-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+
+.fc-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.fc-button:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  outline: none;
+}
+
+.fc-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fc-today-button {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+}
+
+.fc-today-button:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+}
+
+.fc-day-today {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
+  border: 2px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+  color: #3b82f6;
+  font-weight: 700;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: inline-block;
+}
+
+.fc-more-link {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  transition: all 0.2s ease;
+}
+
+.fc-more-link:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #2563eb;
+}
+
+.fc-popover {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.fc-popover-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+  border-radius: 12px 12px 0 0;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #475569;
+}
