@@ -87,7 +87,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
 
   // Transform GitHub events to FullCalendar event format
   const calendarEvents = useMemo(() => {
-    return filteredEvents.map(event => {
+    const events = filteredEvents.map(event => {
       const colors = getEventColor(event.assignees || []);
       
       // Handle events without end dates
@@ -97,6 +97,11 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         // by not setting an end date (FullCalendar will treat as single day)
         eventEnd = undefined;
       }
+      
+      // Get primary assignee for sorting (first assignee or 'unassigned')
+      const primaryAssignee = event.assignees && event.assignees.length > 0 
+        ? event.assignees[0].login.toLowerCase()
+        : 'zzz-unassigned'; // Put unassigned at the end
       
       return {
         id: event.id,
@@ -112,9 +117,17 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
           labels: event.labels || [],
           assignees: event.assignees || [],
           status: event.status,
-          repository: event.url?.split('/').slice(3, 5).join('/')
+          repository: event.url?.split('/').slice(3, 5).join('/'),
+          primaryAssignee: primaryAssignee
         }
       };
+    });
+
+    // Sort events alphabetically by primary assignee
+    return events.sort((a, b) => {
+      const assigneeA = a.extendedProps.primaryAssignee;
+      const assigneeB = b.extendedProps.primaryAssignee;
+      return assigneeA.localeCompare(assigneeB);
     });
   }, [filteredEvents, assigneeColorMap]);
 
