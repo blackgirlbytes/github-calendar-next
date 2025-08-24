@@ -172,7 +172,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         }}
         height="auto"
         eventDisplay="block"
-        dayMaxEvents={3} // Show max 3 events per day, then "+X more"
+        dayMaxEvents={6} // Show max 6 events per day, then "+X more"
         moreLinkClick="popover" // Show popover when clicking "+X more"
         eventOrder="order" // Use our custom order property for sorting
         
