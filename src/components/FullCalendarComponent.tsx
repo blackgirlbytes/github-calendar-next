@@ -103,6 +103,15 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         ? event.assignees[0].login.toLowerCase()
         : 'zzz-unassigned'; // Put unassigned at the end
       
+      // Check if issue is completed
+      const isCompleted = event.status === 'closed';
+      
+      // Adjust colors for completed issues (make them duller)
+      const eventColors = isCompleted ? {
+        bg: colors.bg + '80', // Add transparency (50% opacity)
+        border: colors.border + '80'
+      } : colors;
+      
       return {
         id: event.id,
         title: event.title,
@@ -110,15 +119,16 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         end: eventEnd,
         allDay: !eventEnd, // Mark as all-day only if no end date
         url: event.url,
-        backgroundColor: colors.bg,
-        borderColor: colors.border,
-        textColor: '#ffffff',
+        backgroundColor: eventColors.bg,
+        borderColor: eventColors.border,
+        textColor: isCompleted ? '#ffffff80' : '#ffffff', // Duller text for completed
         extendedProps: {
           labels: event.labels || [],
           assignees: event.assignees || [],
           status: event.status,
           repository: event.url?.split('/').slice(3, 5).join('/'),
-          primaryAssignee: primaryAssignee
+          primaryAssignee: primaryAssignee,
+          isCompleted: isCompleted
         }
       };
     });
@@ -189,9 +199,28 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         eventContent={(eventInfo) => {
           const { event } = eventInfo;
           const assignees = event.extendedProps.assignees || [];
+          const isCompleted = event.extendedProps.isCompleted;
           
           return (
             <div className="flex items-center gap-1 p-1 text-xs">
+              {/* Completion checkmark */}
+              {isCompleted && (
+                <div className="flex-shrink-0">
+                  <svg 
+                    className="w-3 h-3 text-white/80" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    title="Completed"
+                  >
+                    <path 
+                      fillRule="evenodd" 
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+                      clipRule="evenodd" 
+                    />
+                  </svg>
+                </div>
+              )}
+              
               {/* Avatar(s) */}
               <div className="flex -space-x-1 flex-shrink-0">
                 {assignees.length > 0 ? (
@@ -200,14 +229,14 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
                       key={assignee.login}
                       src={assignee.avatar_url}
                       alt={assignee.login}
-                      className="w-4 h-4 rounded-full border border-white/50 bg-white"
+                      className={`w-4 h-4 rounded-full border border-white/50 bg-white ${isCompleted ? 'opacity-70' : ''}`}
                       title={assignee.login}
                       style={{ zIndex: 10 - index }}
                     />
                   ))
                 ) : (
                   <div 
-                    className="w-4 h-4 rounded-full border border-white/50 bg-gray-400 flex items-center justify-center"
+                    className={`w-4 h-4 rounded-full border border-white/50 bg-gray-400 flex items-center justify-center ${isCompleted ? 'opacity-70' : ''}`}
                     title="Unassigned"
                   >
                     <span className="text-[8px] text-white font-bold">?</span>
@@ -215,7 +244,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
                 )}
                 {assignees.length > 2 && (
                   <div 
-                    className="w-4 h-4 rounded-full border border-white/50 bg-gray-600 flex items-center justify-center"
+                    className={`w-4 h-4 rounded-full border border-white/50 bg-gray-600 flex items-center justify-center ${isCompleted ? 'opacity-70' : ''}`}
                     title={`+${assignees.length - 2} more assignees`}
                   >
                     <span className="text-[8px] text-white font-bold">+{assignees.length - 2}</span>
@@ -224,7 +253,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
               </div>
               
               {/* Title */}
-              <div className="font-medium truncate flex-1 min-w-0" title={event.title}>
+              <div className={`font-medium truncate flex-1 min-w-0 ${isCompleted ? 'line-through opacity-80' : ''}`} title={event.title}>
                 {event.title}
               </div>
             </div>
