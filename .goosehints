@@ -1,3 +1,5 @@
 NEVER RUN NPM RUN DEV OR NPM RUN START. ALWAYS instruct me to run those commands instead, and tell me what commands to run. 
 
 After every change, create a git commit and push. 
+
+This project is WIP of a calendar view for a github projects board. Allowing the user to visualize what each teammate on a devrel team is working on at the moment. Some requirements were to showing August 2025 and onward. Use FullCalendar. Use Next.js. 

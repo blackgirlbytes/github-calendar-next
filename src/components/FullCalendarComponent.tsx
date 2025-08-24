@@ -90,11 +90,20 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
     return filteredEvents.map(event => {
       const colors = getEventColor(event.assignees || []);
       
+      // Handle events without end dates
+      let eventEnd = event.endDate;
+      if (!eventEnd) {
+        // For events without end dates, make them single-day events
+        // by not setting an end date (FullCalendar will treat as single day)
+        eventEnd = undefined;
+      }
+      
       return {
         id: event.id,
         title: event.title,
         start: event.startDate,
-        end: event.endDate || event.startDate,
+        end: eventEnd,
+        allDay: !eventEnd, // Mark as all-day only if no end date
         url: event.url,
         backgroundColor: colors.bg,
         borderColor: colors.border,
