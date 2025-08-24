@@ -236,6 +236,86 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+      <style jsx global>{`
+        .fc-event {
+          border-radius: 8px !important;
+          border: none !important;
+          margin: 2px 0 !important;
+          font-weight: 600 !important;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .fc-daygrid-event {
+          margin: 2px 1px !important;
+          padding: 0 !important;
+        }
+        
+        .fc-daygrid-day {
+          min-height: 140px !important;
+        }
+        
+        .fc-daygrid-day-frame {
+          min-height: 140px !important;
+        }
+        
+        .fc-daygrid-day-events {
+          margin-top: 4px !important;
+        }
+        
+        .fc-day-today {
+          background-color: rgba(59, 130, 246, 0.05) !important;
+        }
+        
+        .fc-day-today .fc-daygrid-day-number {
+          background-color: #3b82f6 !important;
+          color: white !important;
+          border-radius: 50% !important;
+          width: 28px !important;
+          height: 28px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-weight: 600 !important;
+        }
+        
+        .fc-daygrid-day-number {
+          padding: 4px 8px !important;
+          font-weight: 500 !important;
+          color: #374151 !important;
+        }
+        
+        .fc-col-header-cell {
+          background-color: #f8fafc !important;
+          border-bottom: 2px solid #e5e7eb !important;
+          font-weight: 600 !important;
+          color: #374151 !important;
+          padding: 12px 8px !important;
+        }
+        
+        .fc-scrollgrid {
+          border: 1px solid #e5e7eb !important;
+          border-radius: 12px !important;
+          overflow: hidden !important;
+        }
+        
+        .fc-theme-standard td, .fc-theme-standard th {
+          border-color: #e5e7eb !important;
+        }
+        
+        .fc-more-link {
+          color: #6366f1 !important;
+          font-weight: 600 !important;
+          font-size: 12px !important;
+          padding: 2px 6px !important;
+          border-radius: 4px !important;
+          background-color: rgba(99, 102, 241, 0.1) !important;
+          margin: 2px 1px !important;
+        }
+        
+        .fc-more-link:hover {
+          background-color: rgba(99, 102, 241, 0.2) !important;
+        }
+      `}</style>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -247,7 +327,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         }}
         height="auto"
         eventDisplay="block"
-        dayMaxEvents={6} // Show max 6 events per day, then "+X more"
+        dayMaxEvents={4} // Show max 4 events per day for better visibility, then "+X more"
         moreLinkClick="popover" // Show popover when clicking "+X more"
         eventOrder="order" // Use our custom order property for sorting
         
@@ -262,12 +342,12 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
           const isCompleted = event.extendedProps.isCompleted;
           
           return (
-            <div className="flex items-center gap-1 p-1 text-xs">
+            <div className="flex items-center gap-2 p-2 text-sm min-h-[32px]">
               {/* Completion checkmark */}
               {isCompleted && (
                 <div className="flex-shrink-0">
                   <svg 
-                    className="w-3 h-3 text-white/80" 
+                    className="w-4 h-4 text-white/90" 
                     fill="currentColor" 
                     viewBox="0 0 20 20"
                   >
@@ -288,31 +368,31 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
                       key={assignee.login}
                       src={assignee.avatar_url}
                       alt={assignee.login}
-                      className={`w-4 h-4 rounded-full border border-white/50 bg-white ${isCompleted ? 'opacity-70' : ''}`}
+                      className={`w-5 h-5 rounded-full border-2 border-white/70 bg-white shadow-sm ${isCompleted ? 'opacity-70' : ''}`}
                       title={assignee.login}
                       style={{ zIndex: 10 - index }}
                     />
                   ))
                 ) : (
                   <div 
-                    className={`w-4 h-4 rounded-full border border-white/50 bg-gray-400 flex items-center justify-center ${isCompleted ? 'opacity-70' : ''}`}
+                    className={`w-5 h-5 rounded-full border-2 border-white/70 bg-gray-400 flex items-center justify-center shadow-sm ${isCompleted ? 'opacity-70' : ''}`}
                     title="Unassigned"
                   >
-                    <span className="text-[8px] text-white font-bold">?</span>
+                    <span className="text-[10px] text-white font-bold">?</span>
                   </div>
                 )}
                 {assignees.length > 2 && (
                   <div 
-                    className={`w-4 h-4 rounded-full border border-white/50 bg-gray-600 flex items-center justify-center ${isCompleted ? 'opacity-70' : ''}`}
+                    className={`w-5 h-5 rounded-full border-2 border-white/70 bg-gray-600 flex items-center justify-center shadow-sm ${isCompleted ? 'opacity-70' : ''}`}
                     title={`+${assignees.length - 2} more assignees`}
                   >
-                    <span className="text-[8px] text-white font-bold">+{assignees.length - 2}</span>
+                    <span className="text-[10px] text-white font-bold">+{assignees.length - 2}</span>
                   </div>
                 )}
               </div>
               
               {/* Title */}
-              <div className={`font-medium truncate flex-1 min-w-0 ${isCompleted ? 'line-through opacity-80' : ''}`} title={event.title}>
+              <div className={`font-semibold truncate flex-1 min-w-0 leading-tight ${isCompleted ? 'line-through opacity-80' : ''}`} title={event.title}>
                 {event.title}
               </div>
             </div>
