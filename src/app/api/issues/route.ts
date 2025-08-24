@@ -75,6 +75,8 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { id, title, labels, assignees, status, startDate, endDate } = body;
 
+    console.log('🔧 PATCH request received:', { id, title, startDate, endDate, labels, assignees, status });
+
     if (!id) {
       return NextResponse.json(
         { error: 'Issue ID is required' },
@@ -107,18 +109,22 @@ export async function PATCH(request: NextRequest) {
     issueBody = issueBody.replace(/\*\*End Date:\*\*.*\n?/g, '');
     issueBody = issueBody.replace(/^---\n\n/gm, '');
 
-    // Add new date information at the top
+    // Add new date information at the top with ISO format for better parsing
     let dateInfo = '';
     if (startDate) {
-      dateInfo += `**Start Date:** ${new Date(startDate).toLocaleDateString()}\n`;
+      const startDateObj = new Date(startDate);
+      dateInfo += `**Start Date:** ${startDateObj.toLocaleDateString()} (${startDateObj.toISOString()})\n`;
     }
     if (endDate) {
-      dateInfo += `**End Date:** ${new Date(endDate).toLocaleDateString()}\n`;
+      const endDateObj = new Date(endDate);
+      dateInfo += `**End Date:** ${endDateObj.toLocaleDateString()} (${endDateObj.toISOString()})\n`;
     }
     if (dateInfo) {
       dateInfo += '\n---\n\n';
       issueBody = dateInfo + issueBody;
     }
+
+    console.log('📝 Updated issue body:', issueBody.substring(0, 200) + '...');
 
     // Update the issue
     const updateData: any = {};
@@ -135,6 +141,8 @@ export async function PATCH(request: NextRequest) {
       ...updateData
     });
 
+    console.log('✅ Issue updated successfully:', issue.data.number);
+
     return NextResponse.json({
       success: true,
       issue: {
@@ -143,6 +151,8 @@ export async function PATCH(request: NextRequest) {
         title: issue.data.title,
         url: issue.data.html_url,
         status: issue.data.state as 'open' | 'closed',
+        startDate: startDate || null,
+        endDate: endDate || null,
       }
     });
 

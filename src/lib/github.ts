@@ -310,7 +310,24 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
       }
     });
 
-    // If no start date from fields, use created date
+    // Try to extract dates from issue body if not found in field values
+    if (!startDate || !endDate) {
+      const body = issue.body || '';
+      
+      // Look for date patterns in the issue body
+      const startDateMatch = body.match(/\*\*Start Date:\*\*.*?\(([^)]+)\)/);
+      const endDateMatch = body.match(/\*\*End Date:\*\*.*?\(([^)]+)\)/);
+      
+      if (startDateMatch && !startDate) {
+        startDate = new Date(startDateMatch[1]);
+      }
+      
+      if (endDateMatch && !endDate) {
+        endDate = new Date(endDateMatch[1]);
+      }
+    }
+
+    // If no start date from fields or body, use created date
     if (!startDate) {
       startDate = new Date(issue.created_at);
     }
