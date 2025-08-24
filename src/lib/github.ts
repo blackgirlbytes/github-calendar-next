@@ -296,6 +296,15 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
   return items.map((item) => {
     const issue = item.content;
     
+    // Debug: Log all field values to see what custom fields are available
+    console.log(`🔍 Issue #${issue.number} field values:`, item.fieldValues.nodes.map(fv => ({
+      fieldName: fv.field.name,
+      date: fv.date,
+      text: fv.text,
+      name: fv.name,
+      number: fv.number
+    })));
+    
     // Extract start and end dates from field values
     let startDate: Date | null = null;
     let endDate: Date | null = null;
@@ -305,8 +314,10 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
       
       if (fieldName.includes('start') && fieldValue.date) {
         startDate = new Date(fieldValue.date);
+        console.log(`📅 Found start date from field "${fieldValue.field.name}":`, startDate);
       } else if ((fieldName.includes('end') || fieldName.includes('due')) && fieldValue.date) {
         endDate = new Date(fieldValue.date);
+        console.log(`📅 Found end date from field "${fieldValue.field.name}":`, endDate);
       }
     });
 
@@ -320,21 +331,25 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
       
       if (startDateMatch && !startDate) {
         startDate = new Date(startDateMatch[1]);
+        console.log(`📅 Found start date from body:`, startDate);
       }
       
       if (endDateMatch && !endDate) {
         endDate = new Date(endDateMatch[1]);
+        console.log(`📅 Found end date from body:`, endDate);
       }
     }
 
     // If no start date from fields or body, use created date
     if (!startDate) {
       startDate = new Date(issue.created_at);
+      console.log(`📅 Using created date as start date:`, startDate);
     }
 
     // If issue has a milestone with due date, use that as end date
     if (!endDate && issue.milestone?.due_on) {
       endDate = new Date(issue.milestone.due_on);
+      console.log(`📅 Using milestone due date as end date:`, endDate);
     }
 
     return {

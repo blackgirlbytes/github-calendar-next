@@ -68,8 +68,9 @@ export default function Home() {
     console.log('🔄 handleEventUpdate called with:', eventData);
     
     try {
+      // Update the issue (title, labels, assignees, etc.)
       console.log('📡 Making PATCH request to /api/issues');
-      const response = await fetch('/api/issues', {
+      const issueResponse = await fetch('/api/issues', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -77,16 +78,44 @@ export default function Home() {
         body: JSON.stringify(eventData),
       });
 
-      console.log('📡 Response status:', response.status);
+      console.log('📡 Issue response status:', issueResponse.status);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ API error response:', errorData);
+      if (!issueResponse.ok) {
+        const errorData = await issueResponse.json();
+        console.error('❌ Issue API error response:', errorData);
         throw new Error(errorData.error || 'Failed to update issue');
       }
 
-      const result = await response.json();
-      console.log('✅ Issue updated successfully:', result);
+      const issueResult = await issueResponse.json();
+      console.log('✅ Issue updated successfully:', issueResult);
+
+      // Update project custom fields (dates)
+      if (eventData.startDate || eventData.endDate) {
+        console.log('📅 Making PATCH request to /api/project-fields for dates');
+        const fieldsResponse = await fetch('/api/project-fields', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            issueNumber: eventData.id,
+            startDate: eventData.startDate,
+            endDate: eventData.endDate,
+          }),
+        });
+
+        console.log('📅 Project fields response status:', fieldsResponse.status);
+
+        if (!fieldsResponse.ok) {
+          const errorData = await fieldsResponse.json();
+          console.error('❌ Project fields API error response:', errorData);
+          // Don't throw here - issue update succeeded, just log the field update failure
+          console.warn('⚠️ Project fields update failed, but issue was updated successfully');
+        } else {
+          const fieldsResult = await fieldsResponse.json();
+          console.log('✅ Project fields updated successfully:', fieldsResult);
+        }
+      }
       
       // Refresh events from GitHub to ensure consistency
       console.log('🔄 Refreshing events...');
