@@ -272,8 +272,8 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         // Styling
         themeSystem="standard"
         
-        // Custom CSS classes - removed hover effect to prevent flickering on spanned events
-        eventClassNames="cursor-pointer"
+        // Custom CSS classes
+        eventClassNames="cursor-pointer hover:opacity-80 transition-opacity"
         
         // Weekend styling
         weekends={true}
