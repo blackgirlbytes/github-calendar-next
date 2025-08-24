@@ -76,7 +76,9 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
     setIsSaving(true);
     try {
-      await onSave(formData);
+      // Include the event ID when editing an existing issue
+      const saveData = mode === 'edit' && event ? { ...formData, id: event.id } : formData;
+      await onSave(saveData);
       setIsEditing(false);
       if (mode === 'create') {
         onClose();

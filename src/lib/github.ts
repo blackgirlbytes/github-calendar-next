@@ -321,7 +321,7 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
     }
 
     return {
-      id: item.id,
+      id: `${issue.number}`, // Use issue number as ID for easier API updates
       title: issue.title,
       startDate,
       endDate,

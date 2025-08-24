@@ -82,11 +82,28 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Extract issue number from ID - handle both numeric IDs and GitHub issue numbers
+    let issueNumber: number;
+    if (typeof id === 'string' && id.includes('#')) {
+      // If ID contains '#', extract the number after it
+      issueNumber = parseInt(id.split('#')[1]);
+    } else {
+      // Otherwise, extract all digits from the ID
+      issueNumber = parseInt(id.toString().replace(/\D/g, ''));
+    }
+
+    if (!issueNumber || isNaN(issueNumber)) {
+      return NextResponse.json(
+        { error: 'Invalid issue ID format' },
+        { status: 400 }
+      );
+    }
+
     // First, get the current issue to preserve existing body content
     const currentIssue = await octokit.rest.issues.get({
       owner: OWNER,
       repo: REPO,
-      issue_number: parseInt(id.replace(/\D/g, '')) // Extract number from ID
+      issue_number: issueNumber
     });
 
     // Update the issue body with new date information
@@ -121,7 +138,7 @@ export async function PATCH(request: NextRequest) {
     const issue = await octokit.rest.issues.update({
       owner: OWNER,
       repo: REPO,
-      issue_number: parseInt(id.replace(/\D/g, '')),
+      issue_number: issueNumber,
       ...updateData
     });
 
