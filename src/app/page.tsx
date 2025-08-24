@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Calendar from '@/components/Calendar';
+import FullCalendarComponent from '@/components/FullCalendarComponent';
 import EventDetails from '@/components/EventDetails';
 import { CalendarEvent } from '@/types/github';
 import { Github, AlertCircle } from 'lucide-react';
@@ -143,7 +143,7 @@ export default function Home() {
             </div>
 
             {/* Calendar */}
-            <Calendar 
+            <FullCalendarComponent 
               events={events} 
               loading={loading}
             />
