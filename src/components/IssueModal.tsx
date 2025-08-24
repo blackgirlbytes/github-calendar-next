@@ -224,7 +224,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
             </div>
             <div className="ml-6 space-y-3">
               <div className="flex items-center space-x-3">
-                <span className="font-medium w-16">Start:</span>
+                <span className="font-semibold text-gray-800 w-16">Start:</span>
                 {isEditing ? (
                   <input
                     type="date"
@@ -240,7 +240,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
                 )}
               </div>
               <div className="flex items-center space-x-3">
-                <span className="font-medium w-16">End:</span>
+                <span className="font-semibold text-gray-800 w-16">End:</span>
                 {isEditing ? (
                   <div className="flex items-center space-x-2">
                     <input
