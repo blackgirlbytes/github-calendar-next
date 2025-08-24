@@ -123,12 +123,32 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
       };
     });
 
-    // Sort events alphabetically by primary assignee
-    return events.sort((a, b) => {
-      const assigneeA = a.extendedProps.primaryAssignee;
-      const assigneeB = b.extendedProps.primaryAssignee;
-      return assigneeA.localeCompare(assigneeB);
-    });
+    // Sort events alphabetically by primary assignee and add order property
+    const sortedEvents = events
+      .sort((a, b) => {
+        const assigneeA = a.extendedProps.primaryAssignee;
+        const assigneeB = b.extendedProps.primaryAssignee;
+        return assigneeA.localeCompare(assigneeB);
+      })
+      .map((event, index) => ({
+        ...event,
+        order: index // Force FullCalendar to respect our sorting
+      }));
+
+    // Debug logging for August 2nd events
+    const aug2Events = sortedEvents.filter(event => 
+      event.start && new Date(event.start).toDateString() === new Date('2025-08-02').toDateString()
+    );
+    if (aug2Events.length > 0) {
+      console.log('August 2nd events in order:', aug2Events.map(e => ({
+        title: e.title,
+        assignee: e.extendedProps.primaryAssignee,
+        assignees: e.extendedProps.assignees?.map((a: any) => a.login),
+        order: e.order
+      })));
+    }
+
+    return sortedEvents;
   }, [filteredEvents, assigneeColorMap]);
 
   if (loading) {
@@ -154,6 +174,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         eventDisplay="block"
         dayMaxEvents={3} // Show max 3 events per day, then "+X more"
         moreLinkClick="popover" // Show popover when clicking "+X more"
+        eventOrder="order" // Use our custom order property for sorting
         
         // Event styling and interaction
         eventClick={(info) => {
