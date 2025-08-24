@@ -15,25 +15,72 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
   events, 
   loading = false 
 }) => {
+  // Color palette for assignees
+  const assigneeColors = [
+    { bg: '#3b82f6', border: '#1d4ed8' }, // Blue
+    { bg: '#10b981', border: '#047857' }, // Green
+    { bg: '#f59e0b', border: '#d97706' }, // Amber
+    { bg: '#ef4444', border: '#dc2626' }, // Red
+    { bg: '#8b5cf6', border: '#7c3aed' }, // Purple
+    { bg: '#06b6d4', border: '#0891b2' }, // Cyan
+    { bg: '#ec4899', border: '#db2777' }, // Pink
+    { bg: '#84cc16', border: '#65a30d' }, // Lime
+    { bg: '#f97316', border: '#ea580c' }, // Orange
+    { bg: '#6366f1', border: '#4f46e5' }, // Indigo
+  ];
+
+  // Create a consistent color mapping for assignees
+  const assigneeColorMap = useMemo(() => {
+    const uniqueAssignees = Array.from(
+      new Set(
+        events.flatMap(event => 
+          event.assignees?.map(assignee => assignee.login) || []
+        )
+      )
+    );
+    
+    const colorMap: Record<string, { bg: string; border: string }> = {};
+    uniqueAssignees.forEach((login, index) => {
+      colorMap[login] = assigneeColors[index % assigneeColors.length];
+    });
+    
+    return colorMap;
+  }, [events]);
+
+  // Get color for an event based on its assignees
+  const getEventColor = (assignees: Array<{ login: string; avatar_url: string }>) => {
+    if (!assignees || assignees.length === 0) {
+      return { bg: '#6b7280', border: '#4b5563' }; // Gray for unassigned
+    }
+    
+    // Use the first assignee's color if multiple assignees
+    const primaryAssignee = assignees[0];
+    return assigneeColorMap[primaryAssignee.login] || { bg: '#6b7280', border: '#4b5563' };
+  };
+
   // Transform GitHub events to FullCalendar event format
   const calendarEvents = useMemo(() => {
-    return events.map(event => ({
-      id: event.id,
-      title: event.title,
-      start: event.startDate,
-      end: event.endDate || event.startDate, // Use startDate as end if no endDate
-      url: event.url,
-      backgroundColor: '#3b82f6', // Blue color for GitHub issues
-      borderColor: '#1d4ed8',
-      textColor: '#ffffff',
-      extendedProps: {
-        labels: event.labels || [],
-        assignees: event.assignees,
-        status: event.status,
-        repository: event.url?.split('/').slice(3, 5).join('/')
-      }
-    }));
-  }, [events]);
+    return events.map(event => {
+      const colors = getEventColor(event.assignees || []);
+      
+      return {
+        id: event.id,
+        title: event.title,
+        start: event.startDate,
+        end: event.endDate || event.startDate,
+        url: event.url,
+        backgroundColor: colors.bg,
+        borderColor: colors.border,
+        textColor: '#ffffff',
+        extendedProps: {
+          labels: event.labels || [],
+          assignees: event.assignees || [],
+          status: event.status,
+          repository: event.url?.split('/').slice(3, 5).join('/')
+        }
+      };
+    });
+  }, [events, assigneeColorMap]);
 
   if (loading) {
     return (
@@ -71,19 +118,45 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         // Custom event content rendering
         eventContent={(eventInfo) => {
           const { event } = eventInfo;
-          const labels = event.extendedProps.labels || [];
+          const assignees = event.extendedProps.assignees || [];
           
           return (
-            <div className="p-1 text-xs">
-              <div className="font-medium truncate" title={event.title}>
+            <div className="flex items-center gap-1 p-1 text-xs">
+              {/* Avatar(s) */}
+              <div className="flex -space-x-1 flex-shrink-0">
+                {assignees.length > 0 ? (
+                  assignees.slice(0, 2).map((assignee: any, index: number) => (
+                    <img
+                      key={assignee.login}
+                      src={assignee.avatar_url}
+                      alt={assignee.login}
+                      className="w-4 h-4 rounded-full border border-white/50 bg-white"
+                      title={assignee.login}
+                      style={{ zIndex: 10 - index }}
+                    />
+                  ))
+                ) : (
+                  <div 
+                    className="w-4 h-4 rounded-full border border-white/50 bg-gray-400 flex items-center justify-center"
+                    title="Unassigned"
+                  >
+                    <span className="text-[8px] text-white font-bold">?</span>
+                  </div>
+                )}
+                {assignees.length > 2 && (
+                  <div 
+                    className="w-4 h-4 rounded-full border border-white/50 bg-gray-600 flex items-center justify-center"
+                    title={`+${assignees.length - 2} more assignees`}
+                  >
+                    <span className="text-[8px] text-white font-bold">+{assignees.length - 2}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Title */}
+              <div className="font-medium truncate flex-1 min-w-0" title={event.title}>
                 {event.title}
               </div>
-              {labels.length > 0 && (
-                <div className="text-xs opacity-75 truncate">
-                  {labels.slice(0, 2).map((label: any) => label.name).join(', ')}
-                  {labels.length > 2 && '...'}
-                </div>
-              )}
             </div>
           );
         }}
@@ -111,18 +184,6 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         // First day of week (0 = Sunday, 1 = Monday)
         firstDay={0}
       />
-      
-      {/* Legend */}
-      <div className="mt-6 flex flex-wrap gap-4 text-sm text-gray-600">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span>GitHub Issues ({events.length} total)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded"></div>
-          <span>Click events to view on GitHub</span>
-        </div>
-      </div>
     </div>
   );
 };
