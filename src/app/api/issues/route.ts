@@ -5,8 +5,8 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-const OWNER = 'square'; // Organization name
-const REPO = 'devrel-open-source'; // Repository name
+const OWNER = 'squareup'; // Organization name
+const REPO = 'developer-programs'; // Repository name
 
 export async function POST(request: NextRequest) {
   try {
