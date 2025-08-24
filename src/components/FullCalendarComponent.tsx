@@ -9,11 +9,13 @@ import { CalendarEvent } from '@/types/github';
 interface FullCalendarComponentProps {
   events: CalendarEvent[];
   loading?: boolean;
+  selectedAssignees?: string[];
 }
 
 const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({ 
   events, 
-  loading = false 
+  loading = false,
+  selectedAssignees = []
 }) => {
   // Color palette for assignees
   const assigneeColors = [
@@ -58,9 +60,34 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
     return assigneeColorMap[primaryAssignee.login] || { bg: '#6b7280', border: '#4b5563' };
   };
 
+  // Filter events based on selected assignees
+  const filteredEvents = useMemo(() => {
+    if (selectedAssignees.length === 0) {
+      return events;
+    }
+
+    return events.filter(event => {
+      // Handle unassigned filter
+      if (selectedAssignees.includes('unassigned')) {
+        if (!event.assignees || event.assignees.length === 0) {
+          return true;
+        }
+      }
+
+      // Handle assigned users filter
+      if (event.assignees && event.assignees.length > 0) {
+        return event.assignees.some(assignee => 
+          selectedAssignees.includes(assignee.login)
+        );
+      }
+
+      return false;
+    });
+  }, [events, selectedAssignees]);
+
   // Transform GitHub events to FullCalendar event format
   const calendarEvents = useMemo(() => {
-    return events.map(event => {
+    return filteredEvents.map(event => {
       const colors = getEventColor(event.assignees || []);
       
       return {
@@ -80,7 +107,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         }
       };
     });
-  }, [events, assigneeColorMap]);
+  }, [filteredEvents, assigneeColorMap]);
 
   if (loading) {
     return (
@@ -91,7 +118,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
   }
 
   return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 p-8">
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

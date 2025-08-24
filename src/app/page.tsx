@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import FullCalendarComponent from '@/components/FullCalendarComponent';
+import AssigneeFilter from '@/components/AssigneeFilter';
 import EventDetails from '@/components/EventDetails';
 import { CalendarEvent } from '@/types/github';
 import { Github, AlertCircle } from 'lucide-react';
@@ -11,6 +12,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -42,6 +44,20 @@ export default function Home() {
 
   const handleRefresh = () => {
     window.location.reload();
+  };
+
+  const handleAssigneeToggle = (login: string) => {
+    setSelectedAssignees(prev => {
+      if (prev.includes(login)) {
+        return prev.filter(l => l !== login);
+      } else {
+        return [...prev, login];
+      }
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSelectedAssignees([]);
   };
 
   return (
@@ -101,7 +117,7 @@ export default function Home() {
           <>
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Total Events</h3>
@@ -114,7 +130,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Open Issues</h3>
@@ -127,7 +143,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Closed Issues</h3>
@@ -142,10 +158,19 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Assignee Filter */}
+            <AssigneeFilter
+              events={events}
+              selectedAssignees={selectedAssignees}
+              onAssigneeToggle={handleAssigneeToggle}
+              onClearFilters={handleClearFilters}
+            />
+
             {/* Calendar */}
             <FullCalendarComponent 
               events={events} 
               loading={loading}
+              selectedAssignees={selectedAssignees}
             />
           </>
         )}
