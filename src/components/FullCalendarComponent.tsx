@@ -1,22 +1,39 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarEvent } from '@/types/github';
+import IssueModal from './IssueModal';
 
 interface FullCalendarComponentProps {
   events: CalendarEvent[];
   loading?: boolean;
   selectedAssignees?: string[];
+  onEventUpdate?: (eventData: Partial<CalendarEvent>) => Promise<void>;
+  onEventCreate?: (eventData: Partial<CalendarEvent>) => Promise<void>;
 }
 
 const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({ 
   events, 
   loading = false,
-  selectedAssignees = []
+  selectedAssignees = [],
+  onEventUpdate,
+  onEventCreate
 }) => {
+  // Modal state
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: 'view' | 'edit' | 'create';
+    event?: CalendarEvent | null;
+    selectedDate?: Date;
+  }>({
+    isOpen: false,
+    mode: 'view',
+    event: null,
+    selectedDate: undefined
+  });
   // Color palette for assignees
   const assigneeColors = [
     { bg: '#3b82f6', border: '#1d4ed8' }, // Blue
@@ -162,6 +179,53 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
     return sortedEvents;
   }, [filteredEvents, assigneeColorMap]);
 
+  // Modal handlers
+  const handleEventClick = (clickInfo: any) => {
+    // Find the original event from our events array
+    const originalEvent = events.find(event => event.id === clickInfo.event.extendedProps.originalId);
+    if (originalEvent) {
+      setModalState({
+        isOpen: true,
+        mode: 'view',
+        event: originalEvent,
+        selectedDate: undefined
+      });
+    }
+    clickInfo.jsEvent.preventDefault();
+  };
+
+  const handleDateClick = (dateInfo: any) => {
+    setModalState({
+      isOpen: true,
+      mode: 'create',
+      event: null,
+      selectedDate: new Date(dateInfo.dateStr)
+    });
+  };
+
+  const handleModalClose = () => {
+    setModalState({
+      isOpen: false,
+      mode: 'view',
+      event: null,
+      selectedDate: undefined
+    });
+  };
+
+  const handleModalSave = async (eventData: Partial<CalendarEvent>) => {
+    try {
+      if (modalState.mode === 'create' && onEventCreate) {
+        await onEventCreate(eventData);
+      } else if (modalState.mode === 'edit' && modalState.event && onEventUpdate) {
+        await onEventUpdate({ ...eventData, id: modalState.event.id });
+      }
+      handleModalClose();
+    } catch (error) {
+      console.error('Error saving event:', error);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96 bg-white rounded-lg shadow-lg">
@@ -188,13 +252,8 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         eventOrder="order" // Use our custom order property for sorting
         
         // Event styling and interaction
-        eventClick={(info) => {
-          // Open GitHub issue in new tab
-          if (info.event.url) {
-            window.open(info.event.url, '_blank');
-          }
-          info.jsEvent.preventDefault(); // Prevent default link behavior
-        }}
+        eventClick={handleEventClick}
+        dateClick={handleDateClick}
         
         // Custom event content rendering
         eventContent={(eventInfo) => {
@@ -211,7 +270,6 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
                     className="w-3 h-3 text-white/80" 
                     fill="currentColor" 
                     viewBox="0 0 20 20"
-                    title="Completed"
                   >
                     <path 
                       fillRule="evenodd" 
@@ -283,6 +341,16 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
         
         // First day of week (0 = Sunday, 1 = Monday)
         firstDay={0}
+      />
+      
+      {/* Issue Modal */}
+      <IssueModal
+        event={modalState.event}
+        isOpen={modalState.isOpen}
+        onClose={handleModalClose}
+        onSave={handleModalSave}
+        mode={modalState.mode}
+        selectedDate={modalState.selectedDate}
       />
     </div>
   );

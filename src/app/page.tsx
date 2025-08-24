@@ -60,6 +60,73 @@ export default function Home() {
     setSelectedAssignees([]);
   };
 
+  const handleEventUpdate = async (eventData: Partial<CalendarEvent>) => {
+    try {
+      const response = await fetch('/api/issues', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update issue');
+      }
+
+      const result = await response.json();
+      
+      // Update local state with the updated event
+      setEvents(prev => prev.map(event => 
+        event.id === eventData.id ? { ...event, ...eventData } : event
+      ));
+
+      console.log('Issue updated successfully:', result);
+    } catch (error) {
+      console.error('Error updating issue:', error);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
+  const handleEventCreate = async (eventData: Partial<CalendarEvent>) => {
+    try {
+      const response = await fetch('/api/issues', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create issue');
+      }
+
+      const result = await response.json();
+      
+      // Create new event with the actual GitHub issue data
+      const newEvent: CalendarEvent = {
+        id: result.issue.id,
+        title: result.issue.title,
+        startDate: eventData.startDate || new Date(),
+        endDate: eventData.endDate || null,
+        url: result.issue.url,
+        labels: eventData.labels || [],
+        assignees: eventData.assignees || [],
+        status: result.issue.status,
+        type: 'issue'
+      };
+      
+      setEvents(prev => [...prev, newEvent]);
+      console.log('Issue created successfully:', result);
+    } catch (error) {
+      console.error('Error creating issue:', error);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
@@ -171,6 +238,8 @@ export default function Home() {
               events={events} 
               loading={loading}
               selectedAssignees={selectedAssignees}
+              onEventUpdate={handleEventUpdate}
+              onEventCreate={handleEventCreate}
             />
           </>
         )}

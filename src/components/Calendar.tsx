@@ -8,6 +8,8 @@ import { CalendarEvent } from '@/types/github';
 interface CalendarProps {
   events: CalendarEvent[];
   loading?: boolean;
+  onEventUpdate?: (eventData: Partial<CalendarEvent>) => Promise<void>;
+  onEventCreate?: (eventData: Partial<CalendarEvent>) => Promise<void>;
 }
 
 interface EventPosition {
@@ -18,7 +20,12 @@ interface EventPosition {
   zIndex: number;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ events, loading = false }) => {
+const Calendar: React.FC<CalendarProps> = ({ 
+  events, 
+  loading = false, 
+  onEventUpdate, 
+  onEventCreate 
+}) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [eventPositions, setEventPositions] = useState<EventPosition[]>([]);
   const calendarRef = useRef<HTMLDivElement>(null);
