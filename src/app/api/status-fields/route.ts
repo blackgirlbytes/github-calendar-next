@@ -46,8 +46,14 @@ export async function GET(request: NextRequest) {
       throw new Error(`Project not found with ID: ${PROJECT_ID}`);
     }
 
+    console.log('🔍 Available project fields:', project.fields.nodes.map((field: any) => ({
+      name: field.name,
+      type: field.__typename
+    })));
+
     // Find status-related fields (typically named "Status", "State", etc.)
     const statusFields = project.fields.nodes.filter((field: any) => {
+      if (!field.name || typeof field.name !== 'string') return false;
       const fieldName = field.name.toLowerCase();
       return fieldName.includes('status') || 
              fieldName.includes('state') || 
