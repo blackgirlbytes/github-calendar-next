@@ -38,7 +38,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    startDate: new Date(),
+    startDate: new Date(), // Will be updated by useEffect
     endDate: null as Date | null,
     labels: [] as Array<{ name: string; color: string }>,
     assignees: [] as Array<{ login: string; avatar_url: string }>,
@@ -76,7 +76,12 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
   // Initialize form data when event changes
   useEffect(() => {
-    console.log('🔄 IssueModal useEffect triggered:', { event: !!event, selectedDate, mode });
+    console.log('🔄 IssueModal useEffect triggered:', { 
+      event: !!event, 
+      selectedDate: selectedDate ? selectedDate.toDateString() : null, 
+      mode,
+      currentStartDate: formData.startDate.toDateString()
+    });
     
     if (event) {
       console.log('📝 Setting form data from event:', event);
@@ -89,10 +94,9 @@ const IssueModal: React.FC<IssueModalProps> = ({
         status: event.status,
         projectStatus: event.projectStatus || ''
       });
-    } else if (selectedDate) {
-      console.log('📅 Setting form data from selectedDate:', selectedDate);
-      setFormData(prev => ({
-        ...prev,
+    } else if (selectedDate && mode === 'create') {
+      console.log('📅 Setting form data from selectedDate:', selectedDate.toDateString());
+      setFormData({
         title: '', // Reset title for new issues
         startDate: selectedDate,
         endDate: null,
@@ -100,7 +104,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
         assignees: [], // Reset assignees for new issues
         status: 'open',
         projectStatus: ''
-      }));
+      });
     }
   }, [event, selectedDate, mode]);
 
