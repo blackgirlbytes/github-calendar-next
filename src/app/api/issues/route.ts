@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, labels, assignees, startDate, endDate } = body;
 
+    console.log('🆕 Creating new issue:', { title, startDate, endDate, labels, assignees });
+
     if (!title) {
       return NextResponse.json(
         { error: 'Title is required' },
@@ -20,13 +22,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the issue body with date information
+    // Create the issue body with date information in ISO format for better parsing
     let issueBody = '';
     if (startDate) {
-      issueBody += `**Start Date:** ${new Date(startDate).toLocaleDateString()}\n`;
+      const startDateObj = new Date(startDate);
+      issueBody += `**Start Date:** ${startDateObj.toLocaleDateString()} (${startDateObj.toISOString()})\n`;
+      console.log('📅 Adding start date to issue body:', startDateObj.toISOString());
     }
     if (endDate) {
-      issueBody += `**End Date:** ${new Date(endDate).toLocaleDateString()}\n`;
+      const endDateObj = new Date(endDate);
+      issueBody += `**End Date:** ${endDateObj.toLocaleDateString()} (${endDateObj.toISOString()})\n`;
+      console.log('📅 Adding end date to issue body:', endDateObj.toISOString());
     }
     if (startDate || endDate) {
       issueBody += '\n---\n\n';
@@ -42,14 +48,66 @@ export async function POST(request: NextRequest) {
       assignees: assignees?.map((assignee: any) => assignee.login) || [],
     });
 
+    console.log('✅ Issue created successfully:', issue.data.number);
+
+    // Add the required label for devrel-opensource
+    try {
+      await octokit.rest.issues.addLabels({
+        owner: OWNER,
+        repo: REPO,
+        issue_number: issue.data.number,
+        labels: ['area: devrel-opensource']
+      });
+      console.log('✅ Added required label to issue #', issue.data.number);
+    } catch (labelError) {
+      console.warn('⚠️ Failed to add required label:', labelError);
+    }
+
+    // Try to update project fields if dates are provided
+    if ((startDate || endDate) && issue.data.number) {
+      console.log('📋 Attempting to update project fields for issue #', issue.data.number);
+      
+      // Wait a bit for the issue to be fully created and indexed
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      try {
+        // Make a request to update project fields
+        const projectFieldsResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/project-fields`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            issueNumber: issue.data.number,
+            startDate,
+            endDate,
+          }),
+        });
+
+        if (projectFieldsResponse.ok) {
+          const projectFieldsResult = await projectFieldsResponse.json();
+          console.log('✅ Project fields updated successfully:', projectFieldsResult);
+        } else {
+          const errorData = await projectFieldsResponse.json();
+          console.warn('⚠️ Failed to update project fields:', errorData);
+          // Don't fail the issue creation if project fields update fails
+        }
+      } catch (projectFieldsError) {
+        console.warn('⚠️ Error updating project fields:', projectFieldsError);
+        // Don't fail the issue creation if project fields update fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       issue: {
-        id: issue.data.id.toString(),
+        id: issue.data.number.toString(), // Use issue number as ID for consistency
         number: issue.data.number,
         title: issue.data.title,
         url: issue.data.html_url,
         status: issue.data.state as 'open' | 'closed',
+        startDate: startDate || null,
+        endDate: endDate || null,
       }
     });
 
