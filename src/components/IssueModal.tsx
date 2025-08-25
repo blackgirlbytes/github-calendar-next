@@ -374,10 +374,15 @@ const IssueModal: React.FC<IssueModalProps> = ({
                   <input
                     type="date"
                     value={format(formData.startDate, 'yyyy-MM-dd')}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      startDate: new Date(e.target.value) 
-                    }))}
+                    onChange={(e) => {
+                      // Create date in local timezone to avoid timezone conversion issues
+                      const [year, month, day] = e.target.value.split('-').map(Number);
+                      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        startDate: localDate 
+                      }));
+                    }}
                     className="border border-gray-300 rounded px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
@@ -391,10 +396,22 @@ const IssueModal: React.FC<IssueModalProps> = ({
                     <input
                       type="date"
                       value={formData.endDate ? format(formData.endDate, 'yyyy-MM-dd') : ''}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        endDate: e.target.value ? new Date(e.target.value) : null 
-                      }))}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          // Create date in local timezone to avoid timezone conversion issues
+                          const [year, month, day] = e.target.value.split('-').map(Number);
+                          const localDate = new Date(year, month - 1, day); // month is 0-indexed
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            endDate: localDate 
+                          }));
+                        } else {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            endDate: null 
+                          }));
+                        }
+                      }}
                       className="border border-gray-300 rounded px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     {formData.endDate && (

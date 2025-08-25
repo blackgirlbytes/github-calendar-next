@@ -196,11 +196,21 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
   };
 
   const handleDateClick = (dateInfo: any) => {
+    // Create date in local timezone to avoid timezone conversion issues
+    const [year, month, day] = dateInfo.dateStr.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day); // month is 0-indexed
+    
+    console.log('📅 Date clicked:', {
+      dateStr: dateInfo.dateStr,
+      selectedDate: selectedDate.toDateString(),
+      localDate: selectedDate
+    });
+    
     setModalState({
       isOpen: true,
       mode: 'create',
       event: null,
-      selectedDate: new Date(dateInfo.dateStr)
+      selectedDate: selectedDate
     });
   };
 
