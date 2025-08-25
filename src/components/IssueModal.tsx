@@ -48,6 +48,11 @@ const IssueModal: React.FC<IssueModalProps> = ({
   const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
   const [filteredAssignees, setFilteredAssignees] = useState<Array<{ login: string; avatar_url: string }>>([]);
   
+  // State for label input
+  const [newLabelInput, setNewLabelInput] = useState('');
+  const [showLabelDropdown, setShowLabelDropdown] = useState(false);
+  const [filteredLabels, setFilteredLabels] = useState<Array<{ name: string; color: string }>>([]);
+  
   // DevRel team members
   const commonAssignees = [
     { login: 'taniashiba', avatar_url: 'https://github.com/taniashiba.png' },
@@ -58,6 +63,26 @@ const IssueModal: React.FC<IssueModalProps> = ({
     { login: 'angiejones', avatar_url: 'https://github.com/angiejones.png' },
     { login: 'EbonyLouis', avatar_url: 'https://github.com/EbonyLouis.png' },
     { login: 'agiuliano-square', avatar_url: 'https://github.com/agiuliano-square.png' },
+  ];
+
+  // Common labels for DevRel work
+  const commonLabels = [
+    { name: 'blog post', color: '#0075ca' },
+    { name: 'documentation', color: '#0052cc' },
+    { name: 'tutorial', color: '#1d76db' },
+    { name: 'video', color: '#5319e7' },
+    { name: 'conference', color: '#d93f0b' },
+    { name: 'workshop', color: '#fbca04' },
+    { name: 'social media', color: '#0e8a16' },
+    { name: 'community', color: '#006b75' },
+    { name: 'partnership', color: '#7057ff' },
+    { name: 'research', color: '#b60205' },
+    { name: 'demo', color: '#f9d0c4' },
+    { name: 'hackathon', color: '#c2e0c6' },
+    { name: 'webinar', color: '#bfd4f2' },
+    { name: 'podcast', color: '#d4c5f9' },
+    { name: 'high priority', color: '#d93f0b' },
+    { name: 'low priority', color: '#7057ff' },
   ];
 
   // Initialize form data when event changes
@@ -137,14 +162,62 @@ const IssueModal: React.FC<IssueModalProps> = ({
     }
   };
 
-  const addLabel = () => {
-    const name = prompt('Enter label name:');
-    if (name) {
-      const color = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+  const addLabel = (label: { name: string; color: string }) => {
+    if (!formData.labels.find(l => l.name === label.name)) {
       setFormData(prev => ({
         ...prev,
-        labels: [...prev.labels, { name, color }]
+        labels: [...prev.labels, label]
       }));
+      setNewLabelInput('');
+      setShowLabelDropdown(false);
+    }
+  };
+
+  const handleLabelInputChange = (value: string) => {
+    setNewLabelInput(value);
+    
+    if (value.trim()) {
+      // Filter common labels based on input
+      const filtered = commonLabels.filter(label => 
+        label.name.toLowerCase().includes(value.toLowerCase()) &&
+        !formData.labels.find(l => l.name === label.name)
+      );
+      setFilteredLabels(filtered);
+      setShowLabelDropdown(filtered.length > 0);
+    } else {
+      setShowLabelDropdown(false);
+      setFilteredLabels([]);
+    }
+  };
+
+  const handleLabelInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredLabels.length > 0) {
+        // If there are suggestions, use the first one
+        addLabel(filteredLabels[0]);
+      } else if (newLabelInput.trim()) {
+        // Otherwise, create a new label from the input
+        addLabel({
+          name: newLabelInput.trim(),
+          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        });
+      }
+    } else if (e.key === 'Escape') {
+      setShowLabelDropdown(false);
+    }
+  };
+
+  const handleLabelAddButtonClick = () => {
+    if (filteredLabels.length > 0) {
+      // If there are suggestions, use the first one
+      addLabel(filteredLabels[0]);
+    } else if (newLabelInput.trim()) {
+      // Otherwise, create a new label from the input
+      addLabel({
+        name: newLabelInput.trim(),
+        color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+      });
     }
   };
 
@@ -333,42 +406,77 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
           {/* Labels */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Tag className="w-4 h-4" />
-                <span className="font-medium">Labels</span>
-              </div>
-              {isEditing && (
-                <button
-                  onClick={addLabel}
-                  className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Label</span>
-                </button>
-              )}
+            <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+              <Tag className="w-4 h-4" />
+              <span className="font-medium">Labels</span>
             </div>
-            <div className="ml-6 flex flex-wrap gap-2">
-              {formData.labels.length > 0 ? (
-                formData.labels.map((label, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 rounded-full text-xs font-medium text-white flex items-center gap-1"
-                    style={{ backgroundColor: label.color }}
-                  >
-                    {label.name}
-                    {isEditing && (
-                      <button
-                        onClick={() => removeLabel(index)}
-                        className="hover:bg-black/20 rounded-full p-0.5"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </span>
-                ))
-              ) : (
-                <span className="text-gray-500 text-sm">No labels</span>
+            <div className="ml-6">
+              {/* Current labels */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.labels.length > 0 ? (
+                  formData.labels.map((label, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 rounded-full text-xs font-medium text-white flex items-center gap-1"
+                      style={{ backgroundColor: label.color }}
+                    >
+                      {label.name}
+                      {isEditing && (
+                        <button
+                          onClick={() => removeLabel(index)}
+                          className="hover:bg-black/20 rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-500 text-sm">No labels</span>
+                )}
+              </div>
+              
+              {/* Add label input (only in edit mode) */}
+              {isEditing && (
+                <div className="relative">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={newLabelInput}
+                      onChange={(e) => handleLabelInputChange(e.target.value)}
+                      onKeyPress={handleLabelInputKeyPress}
+                      placeholder="Enter label name..."
+                      className="border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-1"
+                    />
+                    <button
+                      onClick={handleLabelAddButtonClick}
+                      disabled={!newLabelInput.trim()}
+                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                  
+                  {/* Dropdown with label suggestions */}
+                  {showLabelDropdown && filteredLabels.length > 0 && (
+                    <div className="absolute top-full left-0 right-12 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
+                      {filteredLabels.map((label, index) => (
+                        <button
+                          key={label.name}
+                          onClick={() => addLabel(label)}
+                          className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 text-left"
+                        >
+                          <div 
+                            className="w-4 h-4 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: label.color }}
+                          ></div>
+                          <span className="text-sm text-gray-700">{label.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
