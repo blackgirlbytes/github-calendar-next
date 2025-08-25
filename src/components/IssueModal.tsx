@@ -236,7 +236,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
                     className="border border-gray-300 rounded px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
-                  <span>{format(formData.startDate, 'PPP')}</span>
+                  <span className="text-gray-800 font-medium">{format(formData.startDate, 'PPP')}</span>
                 )}
               </div>
               <div className="flex items-center space-x-3">
@@ -263,7 +263,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
                     )}
                   </div>
                 ) : (
-                  <span>{formData.endDate ? format(formData.endDate, 'PPP') : 'No end date'}</span>
+                  <span className="text-gray-800 font-medium">{formData.endDate ? format(formData.endDate, 'PPP') : 'No end date'}</span>
                 )}
               </div>
             </div>
