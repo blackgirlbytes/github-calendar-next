@@ -39,6 +39,7 @@ export interface ProjectItem {
       };
       value?: string;
       date?: string;
+      name?: string; // For single select fields like status
     }>;
   };
 }
@@ -70,5 +71,16 @@ export interface CalendarEvent {
     avatar_url: string;
   }>;
   status: 'open' | 'closed';
+  projectStatus?: string; // Status from GitHub project (e.g., "In Progress", "Done", "New")
   type: 'issue' | 'milestone';
+}
+
+export interface ProjectStatusField {
+  id: string;
+  name: string;
+  options: Array<{
+    id: string;
+    name: string;
+    color: string;
+  }>;
 }

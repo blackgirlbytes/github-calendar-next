@@ -308,6 +308,7 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
     // Extract start and end dates from field values
     let startDate: Date | null = null;
     let endDate: Date | null = null;
+    let projectStatus: string | undefined = undefined;
     
     item.fieldValues.nodes.forEach((fieldValue) => {
       const fieldName = fieldValue.field.name.toLowerCase();
@@ -318,6 +319,9 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
       } else if ((fieldName.includes('end') || fieldName.includes('due')) && fieldValue.date) {
         endDate = new Date(fieldValue.date);
         console.log(`📅 Found end date from field "${fieldValue.field.name}":`, endDate);
+      } else if ((fieldName.includes('status') || fieldName.includes('state') || fieldName.includes('progress')) && fieldValue.name) {
+        projectStatus = fieldValue.name;
+        console.log(`📊 Found project status from field "${fieldValue.field.name}":`, projectStatus);
       }
     });
 
@@ -367,6 +371,7 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
         avatar_url: assignee.avatar_url,
       })),
       status: issue.state,
+      projectStatus,
       type: 'issue' as const,
     };
   }).filter((event) => event.startDate); // Only include events with start dates

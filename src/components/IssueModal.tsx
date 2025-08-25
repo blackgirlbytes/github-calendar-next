@@ -11,9 +11,11 @@ import {
   Plus,
   X,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Activity
 } from 'lucide-react';
 import { CalendarEvent } from '@/types/github';
+import { useStatusFields } from '@/hooks/useStatusFields';
 
 interface IssueModalProps {
   event?: CalendarEvent | null;
@@ -40,7 +42,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
     endDate: null as Date | null,
     labels: [] as Array<{ name: string; color: string }>,
     assignees: [] as Array<{ login: string; avatar_url: string }>,
-    status: 'open' as 'open' | 'closed'
+    status: 'open' as 'open' | 'closed',
+    projectStatus: '' as string
   });
   
   // State for assignee input
@@ -67,6 +70,9 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
   // Repository labels - will be fetched and cached
   const [repositoryLabels, setRepositoryLabels] = useState<Array<{ name: string; color: string }>>([]);
+  
+  // Status fields hook
+  const { statusFields, loading: statusFieldsLoading, error: statusFieldsError } = useStatusFields();
 
   // Initialize form data when event changes
   useEffect(() => {
@@ -77,7 +83,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
         endDate: event.endDate || null,
         labels: event.labels,
         assignees: event.assignees,
-        status: event.status
+        status: event.status,
+        projectStatus: event.projectStatus || ''
       });
     } else if (selectedDate) {
       setFormData(prev => ({
@@ -158,7 +165,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
           endDate: event.endDate || null,
           labels: event.labels,
           assignees: event.assignees,
-          status: event.status
+          status: event.status,
+          projectStatus: event.projectStatus || ''
         });
       }
     }
@@ -482,6 +490,40 @@ const IssueModal: React.FC<IssueModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Project Status */}
+          {statusFields.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+                <Activity className="w-4 h-4" />
+                <span className="font-medium">Project Status</span>
+              </div>
+              <div className="ml-6">
+                {isEditing ? (
+                  <select
+                    value={formData.projectStatus}
+                    onChange={(e) => setFormData(prev => ({ ...prev, projectStatus: e.target.value }))}
+                    className="border border-gray-300 rounded px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select status...</option>
+                    {statusFields[0]?.options.map((option) => (
+                      <option key={option.id} value={option.name}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    formData.projectStatus 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'text-gray-500'
+                  }`}>
+                    {formData.projectStatus || 'No status set'}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Assignees */}
           <div className="mb-6">

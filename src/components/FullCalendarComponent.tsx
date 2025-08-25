@@ -143,6 +143,7 @@ const FullCalendarComponent: React.FC<FullCalendarComponentProps> = ({
           labels: event.labels || [],
           assignees: event.assignees || [],
           status: event.status,
+          projectStatus: event.projectStatus,
           repository: event.url?.split('/').slice(3, 5).join('/'),
           primaryAssignee: primaryAssignee,
           isCompleted: isCompleted,
