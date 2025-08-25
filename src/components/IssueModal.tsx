@@ -38,7 +38,7 @@ const IssueModal: React.FC<IssueModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    startDate: selectedDate || new Date(),
+    startDate: new Date(),
     endDate: null as Date | null,
     labels: [] as Array<{ name: string; color: string }>,
     assignees: [] as Array<{ login: string; avatar_url: string }>,
@@ -76,7 +76,10 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
   // Initialize form data when event changes
   useEffect(() => {
+    console.log('🔄 IssueModal useEffect triggered:', { event: !!event, selectedDate, mode });
+    
     if (event) {
+      console.log('📝 Setting form data from event:', event);
       setFormData({
         title: event.title,
         startDate: event.startDate,
@@ -87,13 +90,19 @@ const IssueModal: React.FC<IssueModalProps> = ({
         projectStatus: event.projectStatus || ''
       });
     } else if (selectedDate) {
+      console.log('📅 Setting form data from selectedDate:', selectedDate);
       setFormData(prev => ({
         ...prev,
+        title: '', // Reset title for new issues
         startDate: selectedDate,
-        endDate: null
+        endDate: null,
+        labels: [], // Reset labels for new issues
+        assignees: [], // Reset assignees for new issues
+        status: 'open',
+        projectStatus: ''
       }));
     }
-  }, [event, selectedDate]);
+  }, [event, selectedDate, mode]);
 
   // Reset editing state when mode changes
   useEffect(() => {
