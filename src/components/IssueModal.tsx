@@ -45,6 +45,17 @@ const IssueModal: React.FC<IssueModalProps> = ({
   
   // State for assignee input
   const [newAssigneeInput, setNewAssigneeInput] = useState('');
+  const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
+  const [filteredAssignees, setFilteredAssignees] = useState<Array<{ login: string; avatar_url: string }>>([]);
+  
+  // Common team members - you can customize this list
+  const commonAssignees = [
+    { login: 'blackgirlbytes', avatar_url: 'https://github.com/blackgirlbytes.png' },
+    { login: 'rizel', avatar_url: 'https://github.com/rizel.png' },
+    { login: 'square', avatar_url: 'https://github.com/square.png' },
+    { login: 'squareup', avatar_url: 'https://github.com/squareup.png' },
+    // Add more team members here
+  ];
 
   // Initialize form data when event changes
   useEffect(() => {
@@ -141,25 +152,62 @@ const IssueModal: React.FC<IssueModalProps> = ({
     }));
   };
 
-  const addAssignee = (username: string) => {
-    const trimmedUsername = username.trim();
-    if (trimmedUsername && !formData.assignees.find(a => a.login === trimmedUsername)) {
-      const newAssignee = {
-        login: trimmedUsername,
-        avatar_url: `https://github.com/${trimmedUsername}.png`
-      };
+  const addAssignee = (assignee: { login: string; avatar_url: string }) => {
+    if (!formData.assignees.find(a => a.login === assignee.login)) {
       setFormData(prev => ({
         ...prev,
-        assignees: [...prev.assignees, newAssignee]
+        assignees: [...prev.assignees, assignee]
       }));
       setNewAssigneeInput('');
+      setShowAssigneeDropdown(false);
+    }
+  };
+
+  const handleAssigneeInputChange = (value: string) => {
+    setNewAssigneeInput(value);
+    
+    if (value.trim()) {
+      // Filter common assignees based on input
+      const filtered = commonAssignees.filter(assignee => 
+        assignee.login.toLowerCase().includes(value.toLowerCase()) &&
+        !formData.assignees.find(a => a.login === assignee.login)
+      );
+      setFilteredAssignees(filtered);
+      setShowAssigneeDropdown(filtered.length > 0);
+    } else {
+      setShowAssigneeDropdown(false);
+      setFilteredAssignees([]);
     }
   };
 
   const handleAssigneeInputKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      addAssignee(newAssigneeInput);
+      if (filteredAssignees.length > 0) {
+        // If there are suggestions, use the first one
+        addAssignee(filteredAssignees[0]);
+      } else if (newAssigneeInput.trim()) {
+        // Otherwise, create a new assignee from the input
+        addAssignee({
+          login: newAssigneeInput.trim(),
+          avatar_url: `https://github.com/${newAssigneeInput.trim()}.png`
+        });
+      }
+    } else if (e.key === 'Escape') {
+      setShowAssigneeDropdown(false);
+    }
+  };
+
+  const handleAddButtonClick = () => {
+    if (filteredAssignees.length > 0) {
+      // If there are suggestions, use the first one
+      addAssignee(filteredAssignees[0]);
+    } else if (newAssigneeInput.trim()) {
+      // Otherwise, create a new assignee from the input
+      addAssignee({
+        login: newAssigneeInput.trim(),
+        avatar_url: `https://github.com/${newAssigneeInput.trim()}.png`
+      });
     }
   };
 
@@ -357,23 +405,45 @@ const IssueModal: React.FC<IssueModalProps> = ({
               
               {/* Add assignee input (only in edit mode) */}
               {isEditing && (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={newAssigneeInput}
-                    onChange={(e) => setNewAssigneeInput(e.target.value)}
-                    onKeyPress={handleAssigneeInputKeyPress}
-                    placeholder="Enter GitHub username..."
-                    className="border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-1"
-                  />
-                  <button
-                    onClick={() => addAssignee(newAssigneeInput)}
-                    disabled={!newAssigneeInput.trim()}
-                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add</span>
-                  </button>
+                <div className="relative">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={newAssigneeInput}
+                      onChange={(e) => handleAssigneeInputChange(e.target.value)}
+                      onKeyPress={handleAssigneeInputKeyPress}
+                      placeholder="Enter GitHub username..."
+                      className="border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-1"
+                    />
+                    <button
+                      onClick={handleAddButtonClick}
+                      disabled={!newAssigneeInput.trim()}
+                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                  
+                  {/* Dropdown with suggestions */}
+                  {showAssigneeDropdown && filteredAssignees.length > 0 && (
+                    <div className="absolute top-full left-0 right-12 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
+                      {filteredAssignees.map((assignee, index) => (
+                        <button
+                          key={assignee.login}
+                          onClick={() => addAssignee(assignee)}
+                          className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 text-left"
+                        >
+                          <img
+                            src={assignee.avatar_url}
+                            alt={assignee.login}
+                            className="w-6 h-6 rounded-full"
+                          />
+                          <span className="text-sm text-gray-700">{assignee.login}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
