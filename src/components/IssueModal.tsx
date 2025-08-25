@@ -48,13 +48,16 @@ const IssueModal: React.FC<IssueModalProps> = ({
   const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
   const [filteredAssignees, setFilteredAssignees] = useState<Array<{ login: string; avatar_url: string }>>([]);
   
-  // Common team members - you can customize this list
+  // DevRel team members
   const commonAssignees = [
+    { login: 'taniashiba', avatar_url: 'https://github.com/taniashiba.png' },
     { login: 'blackgirlbytes', avatar_url: 'https://github.com/blackgirlbytes.png' },
-    { login: 'rizel', avatar_url: 'https://github.com/rizel.png' },
-    { login: 'square', avatar_url: 'https://github.com/square.png' },
-    { login: 'squareup', avatar_url: 'https://github.com/squareup.png' },
-    // Add more team members here
+    { login: 'emma-squared', avatar_url: 'https://github.com/emma-squared.png' },
+    { login: 'dianed-square', avatar_url: 'https://github.com/dianed-square.png' },
+    { login: 'iandouglas', avatar_url: 'https://github.com/iandouglas.png' },
+    { login: 'angiejones', avatar_url: 'https://github.com/angiejones.png' },
+    { login: 'EbonyLouis', avatar_url: 'https://github.com/EbonyLouis.png' },
+    { login: 'agiuliano-square', avatar_url: 'https://github.com/agiuliano-square.png' },
   ];
 
   // Initialize form data when event changes
