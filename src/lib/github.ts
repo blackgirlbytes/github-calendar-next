@@ -329,45 +329,18 @@ export function transformToCalendarEvents(items: ProjectItem[]): CalendarEvent[]
     if (!startDate || !endDate) {
       const body = issue.body || '';
       
-      // Look for date patterns in the issue body (with ISO format in parentheses)
+      // Look for date patterns in the issue body
       const startDateMatch = body.match(/\*\*Start Date:\*\*.*?\(([^)]+)\)/);
       const endDateMatch = body.match(/\*\*End Date:\*\*.*?\(([^)]+)\)/);
       
       if (startDateMatch && !startDate) {
         startDate = new Date(startDateMatch[1]);
-        console.log(`📅 Found start date from body (ISO):`, startDate.toDateString());
+        console.log(`📅 Found start date from body:`, startDate);
       }
       
       if (endDateMatch && !endDate) {
         endDate = new Date(endDateMatch[1]);
-        console.log(`📅 Found end date from body (ISO):`, endDate.toDateString());
-      }
-      
-      // If ISO format didn't work, try simpler date format
-      if (!startDate) {
-        const simpleStartMatch = body.match(/\*\*Start Date:\*\*\s*([^\n(]+)/);
-        if (simpleStartMatch) {
-          const dateStr = simpleStartMatch[1].trim();
-          startDate = new Date(dateStr);
-          if (!isNaN(startDate.getTime())) {
-            console.log(`📅 Found start date from body (simple):`, startDate.toDateString());
-          } else {
-            startDate = null;
-          }
-        }
-      }
-      
-      if (!endDate) {
-        const simpleEndMatch = body.match(/\*\*End Date:\*\*\s*([^\n(]+)/);
-        if (simpleEndMatch) {
-          const dateStr = simpleEndMatch[1].trim();
-          endDate = new Date(dateStr);
-          if (!isNaN(endDate.getTime())) {
-            console.log(`📅 Found end date from body (simple):`, endDate.toDateString());
-          } else {
-            endDate = null;
-          }
-        }
+        console.log(`📅 Found end date from body:`, endDate);
       }
     }
 
