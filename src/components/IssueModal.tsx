@@ -42,6 +42,9 @@ const IssueModal: React.FC<IssueModalProps> = ({
     assignees: [] as Array<{ login: string; avatar_url: string }>,
     status: 'open' as 'open' | 'closed'
   });
+  
+  // State for assignee input
+  const [newAssigneeInput, setNewAssigneeInput] = useState('');
 
   // Initialize form data when event changes
   useEffect(() => {
@@ -138,17 +141,25 @@ const IssueModal: React.FC<IssueModalProps> = ({
     }));
   };
 
-  const addAssignee = () => {
-    const login = prompt('Enter GitHub username:');
-    if (login) {
+  const addAssignee = (username: string) => {
+    const trimmedUsername = username.trim();
+    if (trimmedUsername && !formData.assignees.find(a => a.login === trimmedUsername)) {
       const newAssignee = {
-        login,
-        avatar_url: `https://github.com/${login}.png`
+        login: trimmedUsername,
+        avatar_url: `https://github.com/${trimmedUsername}.png`
       };
       setFormData(prev => ({
         ...prev,
         assignees: [...prev.assignees, newAssignee]
       }));
+      setNewAssigneeInput('');
+    }
+  };
+
+  const handleAssigneeInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addAssignee(newAssigneeInput);
     }
   };
 
@@ -313,43 +324,57 @@ const IssueModal: React.FC<IssueModalProps> = ({
 
           {/* Assignees */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span className="font-medium">Assignees</span>
-              </div>
-              {isEditing && (
-                <button
-                  onClick={addAssignee}
-                  className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Assignee</span>
-                </button>
-              )}
+            <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+              <User className="w-4 h-4" />
+              <span className="font-medium">Assignees</span>
             </div>
-            <div className="ml-6 flex flex-wrap gap-3">
-              {formData.assignees.length > 0 ? (
-                formData.assignees.map((assignee, index) => (
-                  <div key={index} className="flex items-center space-x-2 bg-gray-50 rounded-full pl-1 pr-3 py-1">
-                    <img
-                      src={assignee.avatar_url}
-                      alt={assignee.login}
-                      className="w-6 h-6 rounded-full"
-                    />
-                    <span className="text-sm text-gray-700">{assignee.login}</span>
-                    {isEditing && (
-                      <button
-                        onClick={() => removeAssignee(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <span className="text-gray-500 text-sm">No assignees</span>
+            <div className="ml-6">
+              {/* Current assignees */}
+              <div className="flex flex-wrap gap-3 mb-3">
+                {formData.assignees.length > 0 ? (
+                  formData.assignees.map((assignee, index) => (
+                    <div key={index} className="flex items-center space-x-2 bg-gray-50 rounded-full pl-1 pr-3 py-1">
+                      <img
+                        src={assignee.avatar_url}
+                        alt={assignee.login}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <span className="text-sm text-gray-700">{assignee.login}</span>
+                      {isEditing && (
+                        <button
+                          onClick={() => removeAssignee(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-gray-500 text-sm">No assignees</span>
+                )}
+              </div>
+              
+              {/* Add assignee input (only in edit mode) */}
+              {isEditing && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={newAssigneeInput}
+                    onChange={(e) => setNewAssigneeInput(e.target.value)}
+                    onKeyPress={handleAssigneeInputKeyPress}
+                    placeholder="Enter GitHub username..."
+                    className="border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-1"
+                  />
+                  <button
+                    onClick={() => addAssignee(newAssigneeInput)}
+                    disabled={!newAssigneeInput.trim()}
+                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
