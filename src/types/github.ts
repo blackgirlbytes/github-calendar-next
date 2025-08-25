@@ -39,7 +39,9 @@ export interface ProjectItem {
       };
       value?: string;
       date?: string;
+      text?: string; // For text fields
       name?: string; // For single select fields like status
+      number?: number; // For number fields
     }>;
   };
 }

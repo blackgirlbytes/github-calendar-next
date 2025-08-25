@@ -94,7 +94,7 @@ export async function PATCH(request: NextRequest) {
 
       if (!projectItem) {
         console.error('❌ Project item not found for issue #', issueNumber, 'in project 333');
-        console.log('Available project items:', projectItems.map(item => ({
+        console.log('Available project items:', projectItems.map((item: any) => ({
           projectId: item.project.id,
           projectNumber: item.project.number,
           projectTitle: item.project.title

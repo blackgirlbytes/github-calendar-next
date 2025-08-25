@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FullCalendarComponent from '@/components/FullCalendarComponent';
 import AssigneeFilter from '@/components/AssigneeFilter';
 import EventDetails from '@/components/EventDetails';
+import ThemeToggle from '@/components/ThemeToggle';
 import { CalendarEvent } from '@/types/github';
 import { Github, AlertCircle } from 'lucide-react';
 
@@ -156,9 +157,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20 dark:bg-gray-900/80 dark:border-gray-700/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -166,20 +167,23 @@ export default function Home() {
                 <Github className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-300">
                   GitHub Project Calendar
                 </h1>
-                <p className="text-sm text-gray-600 font-medium">
+                <p className="text-sm text-gray-600 font-medium dark:text-gray-400">
                   DevRel Open Source Issues • Square Organization
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleRefresh}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
-            >
-              Refresh Data
-            </button>
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <button
+                onClick={handleRefresh}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
+              >
+                Refresh Data
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -187,14 +191,14 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
               <div>
-                <h3 className="text-lg font-medium text-red-800">Error Loading Events</h3>
-                <p className="text-red-700 mt-1">{error}</p>
+                <h3 className="text-lg font-medium text-red-800 dark:text-red-200">Error Loading Events</h3>
+                <p className="text-red-700 dark:text-red-300 mt-1">{error}</p>
                 {error.includes('authentication') && (
-                  <div className="mt-3 text-sm text-red-600">
+                  <div className="mt-3 text-sm text-red-600 dark:text-red-400">
                     <p>Make sure you have set the GITHUB_TOKEN environment variable.</p>
                     <p>You can create a personal access token at: <a href="https://github.com/settings/tokens" className="underline" target="_blank" rel="noopener noreferrer">https://github.com/settings/tokens</a></p>
                   </div>
@@ -212,42 +216,42 @@ export default function Home() {
           <>
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Total Events</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Total Events</h3>
                     <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                       {loading ? '...' : events.length}
                     </p>
                   </div>
-                  <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
-                    <Github className="w-8 h-8 text-blue-600" />
+                  <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl">
+                    <Github className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Open Issues</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Open Issues</h3>
                     <p className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                       {loading ? '...' : events.filter(e => e.status === 'open').length}
                     </p>
                   </div>
-                  <div className="p-3 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl">
-                    <AlertCircle className="w-8 h-8 text-emerald-600" />
+                  <div className="p-3 bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 rounded-xl">
+                    <AlertCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Closed Issues</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Closed Issues</h3>
                     <p className="text-4xl font-bold bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
                       {loading ? '...' : events.filter(e => e.status === 'closed').length}
                     </p>
                   </div>
-                  <div className="p-3 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl">
-                    <Github className="w-8 h-8 text-gray-600" />
+                  <div className="p-3 bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-700/30 dark:to-slate-700/30 rounded-xl">
+                    <Github className="w-8 h-8 text-gray-600 dark:text-gray-400" />
                   </div>
                 </div>
               </div>

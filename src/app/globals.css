@@ -3,6 +3,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-background: #ffffff;
+  --border-color: rgba(203, 213, 225, 0.3);
+  --header-bg: rgba(255, 255, 255, 0.8);
+  --gradient-from: #f8fafc;
+  --gradient-to: #f1f5f9;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #1a1a1a;
+  --border-color: rgba(75, 85, 99, 0.3);
+  --header-bg: rgba(26, 26, 26, 0.8);
+  --gradient-from: #1f2937;
+  --gradient-to: #374151;
 }
 
 @theme inline {
@@ -16,6 +31,11 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --card-background: #1a1a1a;
+    --border-color: rgba(75, 85, 99, 0.3);
+    --header-bg: rgba(26, 26, 26, 0.8);
+    --gradient-from: #1f2937;
+    --gradient-to: #374151;
   }
 }
 
@@ -36,7 +56,7 @@ body {
 }
 
 .fc-theme-standard td, .fc-theme-standard th {
-  border-color: rgba(203, 213, 225, 0.3);
+  border-color: var(--border-color);
 }
 
 .fc-col-header-cell {
@@ -50,9 +70,14 @@ body {
   letter-spacing: 0.05em;
 }
 
+.dark .fc-col-header-cell {
+  color: #94a3b8;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+}
+
 .fc-daygrid-day {
-  background: #ffffff;
-  border: 1px solid rgba(203, 213, 225, 0.3);
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
@@ -62,11 +87,20 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.dark .fc-daygrid-day:hover {
+  background: rgba(26, 26, 26, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .fc-daygrid-day-number {
   color: #64748b;
   font-weight: 600;
   font-size: 0.875rem;
   padding: 8px;
+}
+
+.dark .fc-daygrid-day-number {
+  color: #94a3b8;
 }
 
 .fc-event {
@@ -100,6 +134,13 @@ body {
   font-size: 2rem;
   font-weight: 700;
   background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .fc-toolbar-title {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -179,14 +220,22 @@ body {
   border-radius: 12px;
   border: none;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  background: #ffffff;
+  background: var(--card-background);
+}
+
+.dark .fc-popover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
 
 .fc-popover-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+  background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+  border-bottom: 1px solid var(--border-color);
   border-radius: 12px 12px 0 0;
   padding: 12px 16px;
   font-weight: 600;
   color: #475569;
+}
+
+.dark .fc-popover-header {
+  color: #94a3b8;
 }
