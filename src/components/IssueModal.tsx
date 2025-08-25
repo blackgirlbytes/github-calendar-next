@@ -65,25 +65,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
     { login: 'agiuliano-square', avatar_url: 'https://github.com/agiuliano-square.png' },
   ];
 
-  // Common labels for DevRel work
-  const commonLabels = [
-    { name: 'blog post', color: '#0075ca' },
-    { name: 'documentation', color: '#0052cc' },
-    { name: 'tutorial', color: '#1d76db' },
-    { name: 'video', color: '#5319e7' },
-    { name: 'conference', color: '#d93f0b' },
-    { name: 'workshop', color: '#fbca04' },
-    { name: 'social media', color: '#0e8a16' },
-    { name: 'community', color: '#006b75' },
-    { name: 'partnership', color: '#7057ff' },
-    { name: 'research', color: '#b60205' },
-    { name: 'demo', color: '#f9d0c4' },
-    { name: 'hackathon', color: '#c2e0c6' },
-    { name: 'webinar', color: '#bfd4f2' },
-    { name: 'podcast', color: '#d4c5f9' },
-    { name: 'high priority', color: '#d93f0b' },
-    { name: 'low priority', color: '#7057ff' },
-  ];
+  // Repository labels - will be fetched and cached
+  const [repositoryLabels, setRepositoryLabels] = useState<Array<{ name: string; color: string }>>([]);
 
   // Initialize form data when event changes
   useEffect(() => {
@@ -109,6 +92,25 @@ const IssueModal: React.FC<IssueModalProps> = ({
   useEffect(() => {
     setIsEditing(mode === 'edit' || mode === 'create');
   }, [mode]);
+
+  // Fetch repository labels when modal opens (only once)
+  useEffect(() => {
+    if (isOpen && repositoryLabels.length === 0) {
+      const fetchLabels = async () => {
+        try {
+          const response = await fetch('/api/labels');
+          if (response.ok) {
+            const data = await response.json();
+            setRepositoryLabels(data.labels || []);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch repository labels:', error);
+          // Silently fail - user can still create custom labels
+        }
+      };
+      fetchLabels();
+    }
+  }, [isOpen, repositoryLabels.length]);
 
   const handleSave = async () => {
     console.log('🔥 handleSave called!', { mode, event, formData, isEditing });
@@ -177,8 +179,8 @@ const IssueModal: React.FC<IssueModalProps> = ({
     setNewLabelInput(value);
     
     if (value.trim()) {
-      // Filter common labels based on input
-      const filtered = commonLabels.filter(label => 
+      // Filter repository labels based on input
+      const filtered = repositoryLabels.filter(label => 
         label.name.toLowerCase().includes(value.toLowerCase()) &&
         !formData.labels.find(l => l.name === label.name)
       );
